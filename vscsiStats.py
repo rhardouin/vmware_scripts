@@ -69,7 +69,31 @@ def get_vscsi_command_name(operation):
     try:
         return commands_mapping[operation.lower()]
     except KeyError:
-        raise BadUsageError("Unknown operation: '{}'".format(operation))
+        raise BadUsageError("Unknown operation: '{0}'".format(operation))
+
+
+def execute_vscsi_stats_cmd(content, vscsi_command):
+    """Execute a vscsiStats command.
+
+    :param vim.ServiceInstanceContent content: vmomi content instance
+    :param str vscsi_command: vscsiStats command (StartVscsiStats|StopVscsiStats|ResetVscsiStats|FetchAllHistograms)
+    :return: vscsiStats output
+    :rtype: string
+    """
+    from pyVmomi import vim
+
+    vscsi_commands = ('StartVscsiStats', 'StopVscsiStats', 'ResetVscsiStats', 'FetchAllHistograms')
+
+    if vscsi_command not in vscsi_commands:
+        raise ValueError("'{0}' is not a valid vscsiStats command {1}".format(vscsi_command, vscsi_commands))
+
+    service_mgr = vim.ServiceManager('ha-servicemanager')
+    list_view = content.viewManager.CreateListView([service_mgr])
+    service_manager = list_view.view[0]
+    vscsi_service_info = service_manager.QueryServiceList('VscsiStats')
+    vscsi_stats = vscsi_service_info[0].service
+    results = vscsi_stats.ExecuteSimpleCommand(arguments=[vscsi_command])
+    return results
 
 
 if __name__ == '__main__':
@@ -92,13 +116,8 @@ if __name__ == '__main__':
         if content.about.apiType != 'HostAgent':
             raise BadUsageError("Script requires connecting directly to an ESXi host (not vCenter)")
 
-        service_mgr = vim.ServiceManager('ha-servicemanager')
-        list_view = content.viewManager.CreateListView([service_mgr])
-        service_manager = list_view.view[0]
-        vscsi_service_info = service_manager.QueryServiceList('VscsiStats')
-        vscsi_stats = vscsi_service_info[0].service
-        operation = get_vscsi_command_name(args.operation)
-        results = vscsi_stats.ExecuteSimpleCommand(arguments=[operation])
+        vscsi_command = get_vscsi_command_name(args.operation)
+        results = execute_vscsi_stats_cmd(content, vscsi_command)
 
         if args.output:
             with open(args.output, 'w') as out:
