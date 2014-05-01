@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # The following is a BSD 2-Clause license.
 #
 # Copyright (c) 2014, Romain Hardouin
@@ -32,10 +34,6 @@ Require VMWare Vmomi Python bindings (pyVmomi).
 from __future__ import print_function
 import argparse
 import sys
-
-import pyVim.connect
-from pyVmomi import vmodl
-from pyVmomi import vim
 
 
 class BadUsageError(Exception):
@@ -75,8 +73,14 @@ def get_vscsi_command_name(operation):
 
 
 if __name__ == '__main__':
-    service_instance = None
+    try:
+        import pyVim.connect
+        from pyVmomi import vmodl
+        from pyVmomi import vim
+    except ImportError:
+        sys.exit("You need to install pyVmomi to run this script.")
 
+    service_instance = None
     try:
         args = parse_command_line()
         service_instance = pyVim.connect.Connect(host=args.host,

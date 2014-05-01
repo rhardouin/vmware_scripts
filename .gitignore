@@ -55,6 +55,7 @@ docs/_build/
 # virtualenv
 include/
 scripts/
+local/
 
 # IDE
 .idea/

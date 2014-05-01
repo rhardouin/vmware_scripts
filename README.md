@@ -4,12 +4,11 @@ vmware_scripts
 vscsiStats.py
 -------------
 
-Retrieves vscsiStats using the vSphere 5.5 API.
+Python script to retrieve vscsiStats using the vSphere 5.5 API.
 VMWare vscsiStats is intended for storage performance analysis on ESXi host.
 
 
 #### Usage
-
 
     positional arguments:
       operation             Operation to perform [start|stop|reset|getstats]
@@ -26,6 +25,24 @@ VMWare vscsiStats is intended for storage performance analysis on ESXi host.
                             Output to a file
       -d, --display         Print results on standard output even if an output
                             file is specified.
+
+
+#### Example
+
+Start vscsi stats on ESXi host :
+
+    ./vscsiStats.py --host ... -u admin -p passwd start
+
+Save vscsi stats to a file :
+
+    ./vscsiStats.py --host ... -u admin -p passwd --output vscsiStats.xml getstats
+
+Stop vscsi stats on ESXi host :
+
+    ./vscsiStats.py --host ... -u admin -p passwd stop
+
+Don't forget to stop statistics collection since it implies an overhead on
+the ESXi host.
 
 
 License
